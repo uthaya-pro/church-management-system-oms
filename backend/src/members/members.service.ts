@@ -23,6 +23,11 @@ export class MembersService {
     return this.membersRepository.save(newMember);
   }
 
+  async createMany(members: Partial<Member>[]): Promise<Member[]> {
+    const newMembers = this.membersRepository.create(members);
+    return this.membersRepository.save(newMembers);
+  }
+
   async update(id: string, member: Partial<Member>): Promise<Member | null> {
     await this.membersRepository.update(id, member);
     return this.findOne(id);

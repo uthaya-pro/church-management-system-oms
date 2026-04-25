@@ -30,6 +30,7 @@ export class MembersComponent implements OnInit {
   isLoading = signal(true);
   searchQuery = signal('');
   filterStatus = signal<'all' | 'active' | 'inactive' | 'pending'>('all');
+  expandedMemberId = signal<string | null>(null);
   // stats are computed in the data service if needed
 
   // form state
@@ -66,6 +67,14 @@ export class MembersComponent implements OnInit {
 
   trackById(index: number, member: Member) {
     return member.id;
+  }
+
+  toggleMemberDetails(memberId: string): void {
+    this.expandedMemberId.update(current => (current === memberId ? null : memberId));
+  }
+
+  isExpanded(memberId: string): boolean {
+    return this.expandedMemberId() === memberId;
   }
 
   /** form helpers */
@@ -121,5 +130,114 @@ export class MembersComponent implements OnInit {
       status: 'active',
       joinDate: undefined,
     };
+  }
+
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!file.name.endsWith('.csv')) {
+      alert('Please select a CSV file');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const members = this.parseCSV(text);
+      if (members.length === 0) {
+        alert('No valid members found in CSV');
+        return;
+      }
+
+      await this.data.addMembers(members);
+      alert(`Successfully added ${members.length} members`);
+    } catch (error) {
+      console.error('Error processing CSV:', error);
+      alert('Error processing CSV file');
+    }
+
+    // Reset the input
+    input.value = '';
+  }
+
+  private parseCSV(csvText: string): Member[] {
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim());
+    if (lines.length < 2) return []; // Need header + at least one row
+
+    const headers = lines[0].split(',').map(h => h.trim());
+    const normalizedHeaders = headers.map(h => this.normalizeHeader(h));
+
+    const requiredFields: ('name' | 'email' | 'phone' | 'age')[] = ['name', 'email', 'phone', 'age'];
+    const missingHeaders = requiredFields.filter(field => this.getColumnIndex(normalizedHeaders, field) === -1);
+    if (missingHeaders.length > 0) {
+      throw new Error(`Missing required headers: ${missingHeaders.join(', ')}`);
+    }
+
+    const members: Member[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim());
+      if (values.length < normalizedHeaders.length) continue;
+
+      const name = this.getValue(values, normalizedHeaders, 'name');
+      const email = this.getValue(values, normalizedHeaders, 'email');
+      const phone = this.getValue(values, normalizedHeaders, 'phone');
+      const age = this.getValue(values, normalizedHeaders, 'age');
+      const role = this.getValue(values, normalizedHeaders, 'role') || 'Member';
+      const status = this.parseStatus(this.getValue(values, normalizedHeaders, 'status'));
+      const joinDateValue = this.getValue(values, normalizedHeaders, 'joinDate');
+
+      const member: Member = {
+        id: '', // Will be set by backend or service
+        name,
+        email,
+        phone,
+        age,
+        role,
+        status,
+        joinDate: joinDateValue ? new Date(joinDateValue) : new Date(),
+      };
+
+      // Basic validation
+      if (member.name && member.email && member.phone && member.age && member.role) {
+        members.push(member);
+      }
+    }
+
+    return members;
+  }
+
+  private normalizeHeader(header: string): string {
+    return header.toLowerCase().replace(/[^a-z]/g, '');
+  }
+
+  private getColumnIndex(headers: string[], field: 'name' | 'email' | 'phone' | 'age' | 'role' | 'status' | 'joinDate'): number {
+    const aliases: Record<'name' | 'email' | 'phone' | 'age' | 'role' | 'status' | 'joinDate', string[]> = {
+      name: ['name', 'fullname'],
+      email: ['email', 'emailaddress', 'mail'],
+      phone: ['phone', 'phonenumber', 'mobile', 'mobilenumber', 'contactnumber'],
+      age: ['age'],
+      role: ['role', 'designation'],
+      status: ['status', 'activemember'],
+      joinDate: ['joindate', 'joiningdate', 'datejoined'],
+    };
+
+    return headers.findIndex(h => aliases[field].includes(h));
+  }
+
+  private getValue(values: string[], headers: string[], field: 'name' | 'email' | 'phone' | 'age' | 'role' | 'status' | 'joinDate'): string {
+    const index = this.getColumnIndex(headers, field);
+    return index >= 0 ? (values[index] || '').trim() : '';
+  }
+
+  private parseStatus(value: string): Member['status'] {
+    const normalized = value.toLowerCase();
+    if (normalized === 'inactive' || normalized === 'no' || normalized === 'false') {
+      return 'inactive';
+    }
+    if (normalized === 'pending') {
+      return 'pending';
+    }
+    return 'active';
   }
 }

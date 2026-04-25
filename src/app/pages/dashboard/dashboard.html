@@ -42,8 +42,12 @@
         <p class="page-subtitle">Welcome back, {{ userEmail() }}</p>
       </div>
       <div class="header-right">
-        <button class="header-btn">🔔</button>
-        <button class="header-btn">⚙️</button>
+        <button class="header-btn" (click)="navigateTo('notifications')" aria-label="Notifications">
+          &#128276;
+        </button>
+        <button class="header-btn" (click)="navigateTo('settings')" aria-label="Settings">
+          &#9881;
+        </button>
       </div>
     </header>
 

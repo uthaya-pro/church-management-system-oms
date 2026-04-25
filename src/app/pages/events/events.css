@@ -1,4 +1,4 @@
-
+﻿
 .page-container {
 	min-height: 100vh;
 	background-color: #f4f4f4;
@@ -132,7 +132,7 @@
 }
 
 .add-btn:hover {
-	background-color: #0d47a1;
+	background-color: var(--primary-dark);
 	box-shadow: 0 2px 8px rgba(15, 98, 254, 0.3);
 }
 
@@ -234,7 +234,7 @@
 
 .progress-fill {
 	height: 100%;
-	background: linear-gradient(90deg, #0f62fe, #0043ce);
+	background: linear-gradient(90deg, #0f62fe, var(--primary-dark));
 	border-radius: 4px;
 	transition: width 0.3s ease-out;
 }
@@ -254,7 +254,7 @@
 }
 
 .event-btn:hover {
-	background-color: #0d3fb5;
+	background-color: var(--primary-dark);
 }
 
 .event-btn:focus {
@@ -384,7 +384,7 @@
 }
 
 .delete-btn:hover {
-	background-color: #ba1b23;
+	background-color: var(--danger-dark);
 }
 
 .delete-btn:active {
@@ -422,3 +422,4 @@
 		margin-left: 0;
 	}
 }
+

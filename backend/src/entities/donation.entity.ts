@@ -19,4 +19,10 @@ export class Donation {
 
   @Column()
   method: 'cash' | 'check' | 'online' | 'other';
+
+  @Column('text', { nullable: true })
+  verificationImage?: string | null;
+
+  @Column({ default: false })
+  isVerified: boolean;
 }

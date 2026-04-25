@@ -3,15 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DataService, Donation as DonationModel } from '../../services/data.service';
 
-interface Donation {
-  id: string;
-  donor: string;
-  amount: number;
-  date: Date;
-  category: string;
-  method: 'cash' | 'check' | 'online' | 'other';
-}
-
 @Component({
   selector: 'app-donations',
   standalone: true,
@@ -32,6 +23,8 @@ export class DonationsComponent implements OnInit {
   category = signal('Tithes');
   method = signal<'cash' | 'check' | 'online' | 'other'>('cash');
   date = signal<string>(new Date().toISOString().slice(0, 10));
+  verificationImage = signal<string | null>(null);
+  selectedFileName = signal('');
 
   totalAmount = computed(() => this.donations().reduce((s: number, d: any) => s + (d.amount || 0), 0));
   monthlyAverage = computed(() => {
@@ -59,12 +52,47 @@ export class DonationsComponent implements OnInit {
       date: new Date(this.date()),
       category: this.category(),
       method: this.method(),
+      verificationImage: this.verificationImage(),
+      isVerified: Boolean(this.verificationImage()),
     };
     this.dataService.addDonation(newDonation);
     // reset form
     this.donor.set('');
     this.amount.set(null);
     this.date.set(new Date().toISOString().slice(0, 10));
+    this.verificationImage.set(null);
+    this.selectedFileName.set('');
+  }
+
+  async onVerificationImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      input.value = '';
+      return;
+    }
+
+    const imageDataUrl = await this.readFileAsDataURL(file);
+    this.verificationImage.set(imageDataUrl);
+    this.selectedFileName.set(file.name);
+  }
+
+  removeVerificationImage(fileInput: HTMLInputElement): void {
+    this.verificationImage.set(null);
+    this.selectedFileName.set('');
+    fileInput.value = '';
+  }
+
+  private readFileAsDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('Failed to read the image file.'));
+      reader.readAsDataURL(file);
+    });
   }
 
   viewDetails(donation: any): void {

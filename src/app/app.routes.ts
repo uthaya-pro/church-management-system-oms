@@ -5,6 +5,8 @@ import { EventsComponent } from './pages/events/events';
 import { DonationsComponent } from './pages/donations/donations';
 import { MembersComponent } from './pages/members/members';
 import { MemberDetailComponent } from './pages/members/member-detail';
+import { NotificationsComponent } from './pages/notifications/notifications';
+import { SettingsComponent } from './pages/settings/settings';
 
 export const routes: Routes = [
   {
@@ -36,6 +38,14 @@ export const routes: Routes = [
   {
     path: 'donations',
     component: DonationsComponent,
+  },
+  {
+    path: 'notifications',
+    component: NotificationsComponent,
+  },
+  {
+    path: 'settings',
+    component: SettingsComponent,
   },
   {
     path: '**',

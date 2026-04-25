@@ -1,7 +1,7 @@
-<div class="page-container">
+﻿<div class="page-container">
 	<header class="page-header">
 		<div class="header-content">
-			<button class="back-btn" (click)="goBack()">← Back</button>
+			<button class="back-btn" (click)="goBack()">&larr; Back</button>
 			<h1 class="page-title">Donations Management</h1>
 		</div>
 	</header>
@@ -31,17 +31,27 @@
 						<option value="other">Other</option>
 					</select>
 					<input type="date" [value]="date()" (input)="date.set($event.target.value)" />
+					<div class="upload-group">
+						<input id="verificationInput" #verificationInput type="file" accept="image/*" (change)="onVerificationImageSelected($event)" />
+						<label class="upload-btn" for="verificationInput">Attach Screenshot</label>
+						@if (selectedFileName()) {
+							<p class="upload-file-name">{{ selectedFileName() }}</p>
+							<button class="remove-upload-btn" type="button" (click)="removeVerificationImage(verificationInput)">
+								Remove
+							</button>
+						}
+					</div>
 					<button class="add-btn" (click)="addDonation()">Add Donation</button>
 				</div>
 			</div>
 			<div class="stats-section">
 				<div class="stat-card">
 					<p class="stat-label">Total Donations</p>
-					<p class="stat-value">${{ totalAmount() }}</p>
+					<p class="stat-value">&#8377;{{ totalAmount() }}</p>
 				</div>
 				<div class="stat-card">
 					<p class="stat-label">Average Donation</p>
-					<p class="stat-value">${{ monthlyAverage() }}</p>
+					<p class="stat-value">&#8377;{{ monthlyAverage() }}</p>
 				</div>
 				<div class="stat-card">
 					<p class="stat-label">Total Donors</p>
@@ -57,6 +67,7 @@
 							<th>Amount</th>
 							<th>Category</th>
 							<th>Method</th>
+							<th>Verification</th>
 							<th>Date</th>
 							<th>Action</th>
 						</tr>
@@ -65,7 +76,7 @@
 						@for (donation of donations(); track donation.id) {
 							<tr>
 								<td>{{ donation.donor }}</td>
-								<td class="amount">${{ donation.amount }}</td>
+								<td class="amount">&#8377;{{ donation.amount }}</td>
 								<td>
 									<span class="category-badge">{{ donation.category }}</span>
 								</td>
@@ -74,9 +85,17 @@
 										{{ donation.method | titlecase }}
 									</span>
 								</td>
+								<td>
+									<span class="verification-badge" [class.verified]="donation.isVerified" [class.unverified]="!donation.isVerified">
+										{{ donation.isVerified ? 'Verified' : 'Pending' }}
+									</span>
+								</td>
 								<td>{{ donation.date | date: 'MMM d, y' }}</td>
 								<td>
-									<button class="view-btn" (click)="viewDetails(donation)">View</button>
+									<div class="action-buttons">
+										<button class="view-btn" (click)="viewDetails(donation)">View</button>
+										<button class="row-delete-btn" (click)="deleteDonation(donation.id)">Delete</button>
+									</div>
 								</td>
 							</tr>
 						}
@@ -89,7 +108,7 @@
 					<div class="modal-content donation-detail-modal" (click)="$event.stopPropagation()">
 						<div class="modal-header">
 							<h2>{{ selectedDonation().donor }} - Donation Details</h2>
-							<button class="close-btn" (click)="closeDetail()">✕</button>
+							<button class="close-btn" (click)="closeDetail()">&times;</button>
 						</div>
 						<div class="modal-body">
 							<div class="detail-group">
@@ -98,7 +117,7 @@
 							</div>
 							<div class="detail-group">
 								<label>Amount</label>
-								<p class="amount-highlight">${{ selectedDonation().amount }}</p>
+								<p class="amount-highlight">&#8377;{{ selectedDonation().amount }}</p>
 							</div>
 							<div class="detail-group">
 								<label>Category</label>
@@ -112,6 +131,16 @@
 								<label>Date</label>
 								<p>{{ selectedDonation().date | date: 'MMMM d, yyyy' }}</p>
 							</div>
+							<div class="detail-group">
+								<label>Verification Status</label>
+								<p>{{ selectedDonation().isVerified ? 'Verified Automatically' : 'Not Verified' }}</p>
+							</div>
+							@if (selectedDonation().verificationImage) {
+								<div class="detail-group">
+									<label>Payment Screenshot</label>
+									<img class="verification-image" [src]="selectedDonation().verificationImage" alt="Donation payment screenshot" />
+								</div>
+							}
 						</div>
 						<div class="modal-footer">
 							<button class="delete-btn" (click)="deleteDonation(selectedDonation().id)">Delete Donation</button>
@@ -123,3 +152,4 @@
 		}
 	</main>
 </div>
+

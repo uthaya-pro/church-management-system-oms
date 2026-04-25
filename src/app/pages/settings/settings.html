@@ -1,0 +1,56 @@
+<div class="page-container">
+	<header class="page-header">
+		<div class="header-content">
+			<button class="back-btn" (click)="goBack()">&larr; Back</button>
+			<div>
+				<h1 class="page-title">Settings</h1>
+				<p class="page-subtitle">Manage church profile and preferences.</p>
+			</div>
+		</div>
+	</header>
+
+	<main class="page-content">
+		<section class="settings-grid">
+			<div class="settings-card">
+				<h2>Church Profile</h2>
+				<div class="form-group">
+					<label>Church Name</label>
+					<input type="text" [value]="churchName()" />
+				</div>
+				<div class="form-group">
+					<label>Contact Email</label>
+					<input type="email" [value]="contactEmail()" />
+				</div>
+				<div class="form-group">
+					<label>Phone Number</label>
+					<input type="tel" [value]="phoneNumber()" />
+				</div>
+				<button class="primary-btn">Save Changes</button>
+			</div>
+
+			<div class="settings-card">
+				<h2>Notifications</h2>
+				<div class="toggle-row">
+					<div>
+						<p class="toggle-title">Enable Notifications</p>
+						<p class="toggle-desc">Receive alerts for donations, events, and members.</p>
+					</div>
+					<label class="switch">
+						<input type="checkbox" [checked]="notificationsEnabled()" />
+						<span class="slider"></span>
+					</label>
+				</div>
+				<div class="toggle-row">
+					<div>
+						<p class="toggle-title">Weekly Summary</p>
+						<p class="toggle-desc">Get a weekly email summary of activity.</p>
+					</div>
+					<label class="switch">
+						<input type="checkbox" [checked]="weeklySummary()" />
+						<span class="slider"></span>
+					</label>
+				</div>
+			</div>
+		</section>
+	</main>
+</div>

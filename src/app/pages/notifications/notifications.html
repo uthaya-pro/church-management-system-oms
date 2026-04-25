@@ -1,0 +1,34 @@
+<div class="page-container">
+	<header class="page-header">
+		<div class="header-content">
+			<button class="back-btn" (click)="goBack()">&larr; Back</button>
+			<div>
+				<h1 class="page-title">Notifications</h1>
+				<p class="page-subtitle">Stay updated with recent activity.</p>
+			</div>
+		</div>
+		<button class="primary-btn" (click)="markAllRead()">Mark All Read</button>
+	</header>
+
+	<main class="page-content">
+		<div class="notification-list">
+			@for (item of notifications(); track item.id) {
+				<div class="notification-card" [class]="item.read ? 'is-read' : 'is-unread'">
+					<div class="card-main">
+						<div class="status-dot" aria-hidden="true"></div>
+						<div class="card-content">
+							<div class="card-header">
+								<h2>{{ item.title }}</h2>
+								<span class="card-date">{{ item.date }}</span>
+							</div>
+							<p>{{ item.message }}</p>
+						</div>
+					</div>
+					<button class="ghost-btn" (click)="markRead(item.id)" [disabled]="item.read">
+						{{ item.read ? 'Read' : 'Mark Read' }}
+					</button>
+				</div>
+			}
+		</div>
+	</main>
+</div>

@@ -72,7 +72,7 @@ export class DashboardComponent implements OnInit {
       },
       {
         title: 'Donations (This Month)',
-        value: `$${this.data.donationsThisMonth()}`,
+        value: `₹${this.data.donationsThisMonth()}`,
         icon: '💰',
         color: 'green',
       },
@@ -81,7 +81,7 @@ export class DashboardComponent implements OnInit {
     const actList: Activity[] = [];
     this.data.events().slice(-3).forEach(e => actList.push({ id: e.id, title: e.title, date: e.date, type: 'event' }));
     this.data.members().slice(-3).forEach(m => actList.push({ id: m.id, title: `Member registered: ${m.name}`, date: m.joinDate, type: 'member' }));
-    this.data.donations().slice(-3).forEach(d => actList.push({ id: d.id, title: `Donation $${d.amount}`, date: d.date, type: 'donation' }));
+    this.data.donations().slice(-3).forEach(d => actList.push({ id: d.id, title: `Donation ₹${d.amount}`, date: d.date, type: 'donation' }));
     // sort by date descending
     actList.sort((a, b) => b.date.getTime() - a.date.getTime());
     this.activities.set(actList);

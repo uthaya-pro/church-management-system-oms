@@ -31,6 +31,8 @@ export interface Donation {
   date: Date;
   category: string;
   method: 'cash' | 'check' | 'online' | 'other';
+  verificationImage?: string | null;
+  isVerified?: boolean;
 }
 
 export interface AuthResponse {
@@ -86,6 +88,8 @@ export class DataService {
       date: d.date ? new Date(d.date) : new Date(),
       category: d.category,
       method: d.method,
+      verificationImage: d.verificationImage ?? null,
+      isVerified: Boolean(d.isVerified),
     };
   }
 
@@ -137,6 +141,30 @@ export class DataService {
     } catch {
       const local = { ...member, id: Date.now().toString() };
       this.members.update(list => [...list, local]);
+      this.saveToStorage('members', this.members());
+      return local;
+    }
+  }
+
+  async addMembers(members: Member[]): Promise<Member[]> {
+    try {
+      const payload = members.map(member => ({
+        name: member.name,
+        email: member.email,
+        phone: member.phone,
+        age: member.age,
+        status: member.status,
+        role: member.role,
+        joinDate: member.joinDate.toISOString(),
+      }));
+      const created = await firstValueFrom(this.http.post<Member[]>(`${this.apiUrl}/members/bulk`, payload));
+      const mapped = created.map(m => this.mapMember(m));
+      this.members.update(list => [...list, ...mapped]);
+      this.saveToStorage('members', this.members());
+      return mapped;
+    } catch {
+      const local = members.map(member => ({ ...member, id: Date.now().toString() + Math.random() }));
+      this.members.update(list => [...list, ...local]);
       this.saveToStorage('members', this.members());
       return local;
     }
@@ -292,6 +320,8 @@ export class DataService {
         date: donation.date.toISOString(),
         category: donation.category,
         method: donation.method,
+        verificationImage: donation.verificationImage ?? null,
+        isVerified: Boolean(donation.isVerified),
       };
       const created = await firstValueFrom(this.http.post<Donation>(`${this.apiUrl}/donations`, payload));
       const mapped = this.mapDonation(created);
@@ -314,6 +344,8 @@ export class DataService {
         date: updated.date.toISOString(),
         category: updated.category,
         method: updated.method,
+        verificationImage: updated.verificationImage ?? null,
+        isVerified: Boolean(updated.isVerified),
       };
       const result = await firstValueFrom(this.http.patch<Donation>(`${this.apiUrl}/donations/${updated.id}`, payload));
       const mapped = this.mapDonation(result);
@@ -402,8 +434,8 @@ export class DataService {
 
   private seedDonations() {
     const sample: Donation[] = [
-      { id: '1', donor: 'John Doe', amount: 250, date: new Date(), category: 'Tithes', method: 'online' },
-      { id: '2', donor: 'Jane Smith', amount: 500, date: new Date(new Date().getTime() - 86400000), category: 'Building Fund', method: 'check' },
+      { id: '1', donor: 'John Doe', amount: 250, date: new Date(), category: 'Tithes', method: 'online', verificationImage: null, isVerified: false },
+      { id: '2', donor: 'Jane Smith', amount: 500, date: new Date(new Date().getTime() - 86400000), category: 'Building Fund', method: 'check', verificationImage: null, isVerified: false },
     ];
     this.donations.set(sample);
     this.saveToStorage('donations', sample);

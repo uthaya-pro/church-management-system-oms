@@ -21,6 +21,11 @@ export class MembersController {
     return this.membersService.create(member);
   }
 
+  @Post('bulk')
+  createMany(@Body() members: Partial<Member>[]): Promise<Member[]> {
+    return this.membersService.createMany(members);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() member: Partial<Member>): Promise<Member | null> {
     return this.membersService.update(id, member);
